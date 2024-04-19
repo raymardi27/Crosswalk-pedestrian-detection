@@ -1,6 +1,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/dnn.hpp>
 #include <iostream>
+#include <omp.h>
 
 using namespace cv;
 using namespace dnn;
@@ -31,8 +32,13 @@ void postprocess(Mat& frame, const vector<Mat>& outs) {
     vector<float> confidences;
     vector<Rect> boxes;
 
+    #pragma omp parallel for 
     for (size_t i = 0; i < outs.size(); ++i) {
         float* data = (float*)outs[i].data;
+        vector<int> localClassIds;
+        vector<float> localConfidences;
+        vector<Rect> localBoxes;
+        
         for (int j = 0; j < outs[i].rows; ++j, data += outs[i].cols) {
             float confidence = data[4];
             if (confidence > CONFIDENCE_THRESHOLD) {
@@ -43,10 +49,17 @@ void postprocess(Mat& frame, const vector<Mat>& outs) {
                 int left = centerX - width / 2;
                 int top = centerY - height / 2;
 
-                classIds.push_back(0);
-                confidences.push_back((float)confidence);
-                boxes.push_back(Rect(left, top, width, height));
+                localClassIds.push_back(0);
+                localConfidences.push_back((float)confidence);
+                localBoxes.push_back(Rect(left, top, width, height));
             }
+        }
+
+        #pragma omp critical // Use a critical section to avoid race conditions
+        {
+            classIds.insert(classIds.end(), localClassIds.begin(), localClassIds.end());
+            confidences.insert(confidences.end(), localConfidences.begin(), localConfidences.end());
+            boxes.insert(boxes.end(), localBoxes.begin(), localBoxes.end());
         }
     }
 
