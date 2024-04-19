@@ -59,14 +59,27 @@ void postprocess(Mat& frame, const vector<Mat>& outs) {
     }
 }
 
-int main() {
-    // Load network
-    Net net = readNet("yolov3-face.cfg", "yolov3-face.weights");
-    net.setPreferableBackend(DNN_BACKEND_CUDA);
-    net.setPreferableTarget(DNN_TARGET_CUDA);
+int main(int argc, char** argv) {
+    if (argc != 2) {
+        cerr << "Usage: " << argv[0] << " <video_path>" << endl;
+        return 1;
+    }
 
-    // Open a video file or an image file or a camera stream.
-    VideoCapture cap(0);  // Change to the path of your video file if not using a camera
+    // Load network
+    Net net = readNet("tiny-yolo-widerface.cfg", "tiny-yolo-widerface_final.weights");
+    if (net.empty()) {
+        cerr << "Could not load the neural network.\n";
+        return 1;
+    }
+    net.setPreferableBackend(DNN_BACKEND_OPENCV);
+    net.setPreferableTarget(DNN_TARGET_CPU);
+
+    // Open a video file or a camera stream.
+    VideoCapture cap(argv[1]);
+    if (!cap.isOpened()) {
+        cerr << "Could not open video " << argv[1] << endl;
+        return 1;
+    }
 
     Mat frame, blob;
     while (cap.read(frame)) {
