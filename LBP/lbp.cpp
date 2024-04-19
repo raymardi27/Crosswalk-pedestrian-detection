@@ -25,11 +25,18 @@ Mat convertToLBP(const Mat& src_gray) {
     return lbpImg;
 }
 
-// Main function
-int main() {
-    VideoCapture cap(); // Open the default camera
+int main(int argc, char** argv) {
+    // Check if video file path is provided
+    if (argc != 2) {
+        cout << "Usage: " << argv[0] << " <VideoPath>" << endl;
+        return -1;
+    }
+
+    // Open the video file or a camera stream
+    VideoCapture cap(argv[1]);  // Use video file provided as command-line argument
+
     if (!cap.isOpened()) {
-        cerr << "Error opening video stream or file" << endl;
+        cout << "Error opening video stream or file" << endl;
         return -1;
     }
 
@@ -50,8 +57,7 @@ int main() {
         // Apply the skin mask to the LBP image
         lbp &= skinMask;
 
-        // Simple threshold to identify regions, this is a crude approximation
-        // and would normally require more sophisticated processing.
+        // Simple threshold to identify regions
         threshold(lbp, lbp, 50, 255, THRESH_BINARY);
 
         // Display results
