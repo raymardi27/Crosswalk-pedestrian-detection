@@ -27,7 +27,7 @@ Mat convertToLBP(const Mat& src_gray) {
 
 // Main function
 int main() {
-    VideoCapture cap(0); // Open the default camera
+    VideoCapture cap(); // Open the default camera
     if (!cap.isOpened()) {
         cerr << "Error opening video stream or file" << endl;
         return -1;
