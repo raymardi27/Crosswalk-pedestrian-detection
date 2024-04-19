@@ -1,0 +1,28 @@
+git clone https://github.com/opencv/opencv.git
+cd opencv
+git clone https://github.com/opencv/opencv_contrib.git modules/contrib
+
+
+mkdir build && cd build
+
+
+cmake -D CMAKE_BUILD_TYPE=RELEASE \
+      -D CMAKE_INSTALL_PREFIX=/usr/local \
+      -D INSTALL_C_EXAMPLES=ON \
+      -D INSTALL_PYTHON_EXAMPLES=ON \
+      -D WITH_TBB=ON \
+      -D WITH_V4L=ON \
+      -D WITH_QT=ON \
+      -D WITH_OPENGL=ON \
+      -D WITH_CUDA=ON \
+      -D CUDA_ARCH_BIN='7.5' \
+      -D CUDA_ARCH_PTX="" \
+      -D WITH_CUDNN=ON \
+      -D OPENCV_DNN_CUDA=ON \
+      -D ENABLE_FAST_MATH=1 \
+      -D CUDA_FAST_MATH=1 \
+      -D OPENCV_EXTRA_MODULES_PATH=../../opencv/modules/contrib/modules \
+      -D BUILD_EXAMPLES=ON ..
+
+make -j$(nproc)  # Adjust $(nproc) with the number of cores you want to use for the build process
+sudo make install
