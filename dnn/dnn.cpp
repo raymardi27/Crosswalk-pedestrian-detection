@@ -68,7 +68,7 @@ void postprocess(Mat& frame, const vector<Mat>& outs) {
     for (size_t i = 0; i < indices.size(); ++i) {
         int idx = indices[i];
         Rect box = boxes[idx];
-        drawPred(classIds[idx], confidences[idx], box.x, box.y, box.x + box.width, box.y + box.height, frame);
+        drawPred(classIds[idx], confidences[idx]    , box.x, box.y, box.x + box.width, box.y + box.height, frame);
     }
 }
 
@@ -95,7 +95,13 @@ int main(int argc, char** argv) {
     }
 
     Mat frame, blob;
+    double fps = 0.0;
+    int frameCnt = 0;
+    double startTime = (double)getTickCount(); // start fps
+    double t,duration,seconds;
+    string label;
     while (cap.read(frame)) {
+        double t = (double)getTickCount();
         blobFromImage(frame, blob, 1/255.0, Size(NETWORK_WIDTH, NETWORK_HEIGHT), Scalar(0, 0, 0), true, false);
         net.setInput(blob);
         vector<Mat> outs;
@@ -103,8 +109,17 @@ int main(int argc, char** argv) {
 
         postprocess(frame, outs);
 
+        ++frameCnt;
+        duration = (double)getTickCount() - t;
+        seconds = duration/getTickFrequency();
+        fps = 1.0/seconds;
+
+        // Display FPS on frame
+        string label = format("FPS: %.2f", fps);
+        putText(frame, label, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 0), 2);
+
         imshow("Face Detection", frame);
-        if (waitKey(1) == 27) break; // stop if escape key is pressed
+        // if (waitKey(1) == 27) break; // stop if escape key is pressed
     }
     cap.release();
     destroyAllWindows();
