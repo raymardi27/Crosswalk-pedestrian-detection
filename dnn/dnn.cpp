@@ -84,8 +84,17 @@ int main(int argc, char** argv) {
         cerr << "Could not load the neural network.\n";
         return 1;
     }
-    net.setPreferableBackend(DNN_BACKEND_OPENCV);
-    net.setPreferableTarget(DNN_TARGET_CPU);
+    
+    // Check if OpenCV is built with CUDA support and set CUDA as preferable backend and target
+    if (cuda::getCudaEnabledDeviceCount() > 0) {
+        net.setPreferableBackend(DNN_BACKEND_CUDA);
+        net.setPreferableTarget(DNN_TARGET_CUDA);
+        cout << "Using CUDA for processing\n";
+    } else {
+        cerr << "CUDA not available on this device; using CPU.\n";
+        net.setPreferableBackend(DNN_BACKEND_OPENCV);
+        net.setPreferableTarget(DNN_TARGET_CPU);
+    }
 
     // Open a video file or a camera stream.
     VideoCapture cap(argv[1]);
