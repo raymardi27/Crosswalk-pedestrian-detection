@@ -1,15 +1,23 @@
 #include "utilities.h"
 
+cv::dnn::Net faceNet = cv::dnn::readNet(face_cfg_file, face_weights_file);
+cv::dnn::Net personNet = cv::dnn::readNet(person_cfg_file,person_weights_file);
 
 void detectFaces(cv::Mat &blob, std::vector<cv::Mat> &outs) {
     faceNet.setInput(blob);
     faceNet.forward(outs, faceNet.getUnconnectedOutLayersNames());
 }
 
+void detectPeople(cv::Mat &blob, std::vector<cv::Mat> &outs) {
+    personNet.setInput(blob);
+    personNet.forward(outs, personNet.getUnconnectedOutLayersNames());
+}
+
 void configNetwork(cv::dnn::Net &net){
 
     if(faceNet.empty() || personNet.empty()){
     std::cerr << "Could not load the neural networks. \nMake sure that the config and the weights are stored in the same directory as the executable.\nThe names need to be faces.cfg, faces.weights, person.cfg, person.weights"<<std::endl;
+    exit(0);
     }
     // Check if OpenCV is built with CUDA support and set CUDA as preferable backend and target
     if (cuda::getCudaEnabledDeviceCount() > 0) {
@@ -81,10 +89,11 @@ void postProcess(cv::Mat &frame, const std::vector<cv::Mat> &outs,bool faceProce
 void blurFaces(cv::Rect &box, cv::Mat& frame){
     int left = box.x, top = box.y, right = box.x + box.width, bottom = box.y + box.height;
 
+    cv::rectangle(frame, cv::Point(left,top),cv::Point(right,bottom), Scalar(0,255,0),3);
     if(left >= 0 && top >= 0 && right <= frame.cols && bottom <= frame.rows) {
         cv::Mat roi = frame(box);
-        cv::GaussianBlur(roi, roi, cv::Size(31,31),12.0,12.0);
-        roi.copyTo(frame(roi));
+        cv::GaussianBlur(roi, roi, cv::Size(31,31),13.0,13.0);
+        roi.copyTo(frame(box));
     }
 }
 
@@ -100,7 +109,7 @@ void annotate(int classId, float confidence,cv::Rect &box, cv::Mat& frame, bool 
         putText(frame, "Slow Down!", Point(frame.cols / 3, 50), FONT_HERSHEY_SIMPLEX, 2, Scalar(0,0,255),4);
 
     }else{
-        std::cout<< "Extend Green Signal Time"<<endl;
+        putText(frame, "Keep it Green!", Point(frame.cols / 3, 50), FONT_HERSHEY_SIMPLEX, 2, Scalar(0,255,255),4);
     }
     
 

@@ -1,10 +1,4 @@
-#include <opencv2/opencv.hpp>
-#include <opencv2/core.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/dnn.hpp>
-#include <opencv2/core/cuda.hpp>
-#include <iostream>
+#include "utilities.h"
 
 
 using namespace std;
@@ -57,7 +51,7 @@ int main(int argc, char** argv) {
     configNetwork(personNet);
     configNetwork(faceNet);
 
-    Mat frame, blob;
+    Mat frame, maskedFrame,blob;
     double fps_factor = 1.0;
     double video_fps = cap.get(cv::CAP_PROP_FPS);
     fps_factor = 30.0/ video_fps;
@@ -88,7 +82,11 @@ int main(int argc, char** argv) {
         
         detectPeople(blob,outs);
 
-        postprocess(frame, outs,false,true);
+        postProcess(frame, outs,false,true);
+
+        detectFaces(blob, outs);
+
+        postProcess(frame,outs,true,false);
 
         clock_gettime(CLOCK_MONOTONIC, &end);
         seconds = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;

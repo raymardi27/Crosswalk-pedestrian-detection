@@ -1,6 +1,5 @@
 #include "utilities.h"
 
-using namespace std;
 
 int main(int argc, char** argv) {
 
@@ -15,9 +14,9 @@ int main(int argc, char** argv) {
     }
 
     configNetwork(personNet);
-    configNetwork(faceNet);
+    // configNetwork(faceNet);
 
-    Mat frame, blob;
+    cv::Mat frame, blob;
     double fps_factor = 1.0;
     double video_fps = cap.get(cv::CAP_PROP_FPS);
     fps_factor = 30.0/ video_fps;
@@ -39,7 +38,7 @@ int main(int argc, char** argv) {
             continue;
         }
 
-        cv::resize(frame,frame,cv::Size(1280,720));
+        cv::resize(frame,frame,cv::Size(640,480),0,0,cv::INTER_LINEAR);
         
         clock_gettime(CLOCK_MONOTONIC, &start);
         vector<Mat> outs;
@@ -48,7 +47,11 @@ int main(int argc, char** argv) {
 
         detectPeople(blob,outs);
 
-        postProcess(frame,outs,false,false);
+        postProcess(frame, outs,false,false);
+
+        detectFaces(blob, outs);
+
+        postProcess(frame,outs,true,false);
 
         clock_gettime(CLOCK_MONOTONIC, &end);
         seconds = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;

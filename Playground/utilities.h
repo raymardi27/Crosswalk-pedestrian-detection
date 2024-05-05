@@ -25,8 +25,8 @@ const std::string face_weights_file = "faces.weights";
 const std::string person_cfg_file = "person.cfg";
 const std::string person_weights_file = "person.weights";
 
-cv::dnn::Net faceNet = cv::dnn::readNet(face_cfg_file, face_weights_file);
-cv::dnn::Net personNet = cv::dnn::readNet(person_cfg_file,person_weights_file);
+extern cv::dnn::Net faceNet;
+extern cv::dnn::Net personNet;
 
 void configNetwork(cv::dnn::Net&);
 
@@ -38,7 +38,7 @@ void detectFaces(cv::Mat&, std::vector<cv::Mat>&);
 
 void blurFaces(cv::Rect&, cv::Mat&);
 
-void detectPeople(cv::Mat, std::vector<cv::Mat>&);
+void detectPeople(cv::Mat&, std::vector<cv::Mat>&);
 
 void annotate(int, float, cv::Rect&, cv::Mat&, bool);
 
